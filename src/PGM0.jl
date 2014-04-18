@@ -1,5 +1,9 @@
 module PGM0
 
-# package code goes here
+include("utils.jl")
+include("model.jl")
+include("gibbs.jl")
+
+export DiscreteMRF, Gibbs
 
 end # module
