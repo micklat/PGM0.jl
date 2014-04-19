@@ -1,0 +1,5 @@
+* do batch EM for MRFs
+* do TaylorEM for MRFs with full covariance
+* move MoG code into a separate file
+* do low-rank taylor EM for MRFs
+
