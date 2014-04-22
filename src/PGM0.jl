@@ -1,9 +1,9 @@
 module PGM0
 
 include("utils.jl")
-include("model.jl")
+include("MRF.jl")
 include("gibbs.jl")
-include("TaylorEM.jl")
+include("MoG.jl")
 
 export DiscreteMRF, Gibbs
 

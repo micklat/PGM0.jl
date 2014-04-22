@@ -1,4 +1,4 @@
-module TaylorEM
+module MoG # Mixture of Gaussians
 using Distributions
 using PDMats
 using PyPlot
@@ -300,5 +300,5 @@ function compare_methods(n=3000, repetitions=20; seed=0, chart=false)
     if chart; PyPlot.title("vanilla batch"); end
 end
 
-end # TaylorEM
+end # MoG
 

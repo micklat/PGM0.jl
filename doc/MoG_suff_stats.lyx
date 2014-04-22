@@ -1,0 +1,462 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass amsart
+\use_default_options true
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+theorems-ams-extended
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine natbib_authoryear
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Taylor-EM for a mixture of gaussians
+\end_layout
+
+\begin_layout Section
+Parametrization as an exponential family
+\end_layout
+
+\begin_layout Standard
+I shall assume that all mixture components share a constant and known 
+\begin_inset Formula $\Sigma$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+We shall parametrize the mode prior 
+\begin_inset Formula $\pi$
+\end_inset
+
+ as 
+\begin_inset Formula $\pi_{i}=\frac{e^{\alpha_{i}}}{\sum_{j}e^{\alpha_{j}}}=e^{\alpha_{i}-log\sum_{j}e^{\alpha_{j}}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray*}
+p(z|\eta) & = & \pi_{y}\frac{1}{\sqrt{2\pi}^{d}}\left(det\left(\Sigma\right)\right)^{-\frac{1}{2}}e^{-\frac{1}{2}\left(x-\mu_{y}\right)\Sigma^{-1}\left(x-\mu_{y}\right)}\\
+ & = & \left(2\pi\right)^{-\frac{d}{2}}\left(det\left(\Sigma\right)\right)^{-\frac{1}{2}}e^{-\frac{1}{2}x^{t}\Sigma^{-1}x}exp\left(\sum_{i}1_{y=i}\left(log\pi_{i}+x^{T}\Sigma^{-1}\mu_{i}-\frac{1}{2}\mu_{i}^{T}\Sigma^{-1}\mu_{i}\right)\right)\\
+ & = & \left(2\pi\right)^{-\frac{d}{2}}\left(det\left(\Sigma\right)\right)^{-\frac{1}{2}}e^{-\frac{1}{2}x^{t}\Sigma^{-1}x}exp\left(\sum_{i}1_{y=i}\left(\alpha_{i}-log\sum_{j}e^{\alpha_{j}}-\frac{1}{2}\mu_{i}^{T}\Sigma^{-1}\mu_{i}\right)+\sum_{i}1_{y=i}x^{T}\Sigma^{-1}\mu_{i}\right)\\
+ & = & \left(2\pi\right)^{-\frac{d}{2}}\left(det\left(\Sigma\right)\right)^{-\frac{1}{2}}e^{-\frac{1}{2}x^{t}\Sigma^{-1}x}exp\left(\sum_{i}1_{y=i}\left(\alpha_{i}-\frac{1}{2}\mu_{i}^{T}\Sigma^{-1}\mu_{i}\right)+\sum_{i}1_{y=i}x^{T}\Sigma^{-1}\mu_{i}-log\sum_{j}e^{\alpha_{j}}\right)
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $h(z)=\left(2\pi\right)^{-\frac{d}{2}}\left(det\left(\Sigma\right)\right)^{-\frac{1}{2}}e^{-\frac{1}{2}x^{t}\Sigma^{-1}x}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula 
+\begin{equation}
+A\left(\eta\right)=log\sum_{j}e^{\alpha_{j}}\label{eq:A}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and
+\begin_inset Formula 
+\begin{equation}
+\eta=\left[\left(\alpha_{i}-\frac{1}{2}\mu_{i}^{T}\Sigma^{-1}\mu_{i}\right)_{i=1}^{r},\,\left(\left(\Sigma^{-1}\right)_{j\rightarrow}\mu_{i}\right)_{i\in1..r,j\in1..d}\right]^{T}\label{eq:eta}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $T=T\left(Z\right)=\left[\left(1_{Y=i}\right)_{i=1}^{r},\left(1_{Y=i}X_{j}\right)_{i\in1..r,j\in1..d}\right]^{T}=\left[V;vec\left(U\right)\right]$
+\end_inset
+
+, where 
+\begin_inset Formula $V_{i}=1_{Y=i}$
+\end_inset
+
+ and 
+\begin_inset Formula $U_{ij}=1_{Y=i}X_{j}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can now write 
+\begin_inset Formula 
+\begin{align*}
+p\left(Z|\eta\right)= & h(Z)e^{\eta^{T}T\left(Z\right)-A\left(\eta\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To apply Taylor-EM, we need to compute the per-sample 
+\begin_inset Formula $cov(T)$
+\end_inset
+
+ according to the a-posterior mode distribution q.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+cov_{q}\left(1_{Y=i},1_{Y=j}\right) & =E_{q}\left(1_{Y=i=j}\right)-E_{q}\left(1_{Y=i}\right)E_{q}\left(1_{Y=j}\right)\\
+ & =1_{i=j}q(i)-q(i)q(j)=q\left(i\right)\left(1_{i=j}-q\left(j\right)\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+cov_{q}\left(1_{y=i},1_{y=j}X_{k}\right) & =X_{k}cov_{q}\left(1_{Y=i},1_{Y=j}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+cov_{q}\left(1_{y=i}X_{t},1_{y=j}X_{k}\right) & =X_{k}X_{t}cov_{q}\left(1_{Y=i},1_{Y=j}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Going from 
+\begin_inset Formula $\eta$
+\end_inset
+
+ to 
+\begin_inset Formula $\left(\mu,\pi\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+First we extract the 
+\begin_inset Formula $\mu$
+\end_inset
+
+'s from the equation:
+\begin_inset Formula 
+\begin{align*}
+\eta_{t\left(i,j\right)} & =\left(\Sigma^{-1}\right)_{j\rightarrow}\mu_{i}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $t\left(i,j\right)=r+\left(i-1\right)*d+j$
+\end_inset
+
+, for 
+\begin_inset Formula $j\in\{1,..d\}$
+\end_inset
+
+ and 
+\begin_inset Formula $i\in\left\{ 1,..r\right\} $
+\end_inset
+
+, r being the number of modes.
+\end_layout
+
+\begin_layout Standard
+Let 
+\begin_inset Formula $\beta\left(i\right)=\left(\eta_{t(i,1)},..\eta_{t(i,d)}\right)^{T}$
+\end_inset
+
+.
+ So 
+\begin_inset Formula $\beta\left(i\right)=\Sigma^{-1}\mu_{i}$
+\end_inset
+
+, and 
+\begin_inset Formula $\Sigma\cdot\beta\left(i\right)=\mu_{i}$
+\end_inset
+
+ for all 
+\begin_inset Formula $i\in\left\{ 1,..r\right\} $
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+We can now extract 
+\begin_inset Formula $\alpha_{i}=\eta+\frac{1}{2}\mu_{i}^{T}\Sigma^{-1}\mu_{i}=\eta_{i}+\frac{1}{2}\mu_{i}^{T}\beta\left(i\right)$
+\end_inset
+
+.
+ Finally 
+\begin_inset Formula $\pi=normalize\left(exp\left(\alpha\right)\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Gradient of 
+\begin_inset Formula $A\left(\eta\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+Combining these equations:
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Formula 
+\[
+A\left(\alpha\right)=log\sum_{j}e^{\alpha_{j}}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\eta=\left[\left(\alpha_{i}-\frac{1}{2}\mu_{i}^{T}\Sigma^{-1}\mu_{i}\right)_{i=1}^{r},\,\left(\left(\Sigma^{-1}\right)_{j\rightarrow}\mu_{i}\right)_{i\in1..r,j\in1..d}\right]^{T}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\alpha_{i}=\eta+\frac{1}{2}\mu_{i}^{T}\Sigma^{-1}\mu_{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\beta\left(i\right)=\Sigma^{-1}\mu_{i}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We'd like to compute 
+\begin_inset Formula $\nabla_{\eta}A$
+\end_inset
+
+.
+ First, 
+\begin_inset Formula $\alpha_{i}=\eta_{i}+\frac{1}{2}\mu_{i}^{T}\Sigma^{-1}\mu_{i}$
+\end_inset
+
+, and since 
+\begin_inset Formula $\mu_{i}=\Sigma\beta\left(i\right)$
+\end_inset
+
+, 
+\begin_inset Formula 
+\[
+\alpha_{i}=\eta_{i}+\frac{1}{2}\beta\left(i\right)^{T}\Sigma\Sigma^{-1}\Sigma\beta\left(i\right)=\eta_{i}+\frac{1}{2}\beta\left(i\right)^{T}\Sigma\beta\left(i\right)
+\]
+
+\end_inset
+
+and therefore 
+\begin_inset Formula 
+\begin{align*}
+\nabla_{\eta}A & =\sum_{i}\frac{\partial A}{\partial\alpha_{i}}\nabla_{\eta}\alpha_{i}=\frac{\sum_{i}e^{\alpha_{i}}\nabla_{\eta}\alpha_{i}}{\sum_{j}e^{\alpha_{j}}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Consequently, for 
+\begin_inset Formula $i\leq r$
+\end_inset
+
+, 
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial A}{\partial\eta_{i}} & =\frac{e^{\alpha_{i}}}{\sum_{j}e^{\alpha_{j}}}=\pi_{i}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and for 
+\begin_inset Formula $k=t\left(i,j\right)$
+\end_inset
+
+, since 
+\begin_inset Formula $\eta_{k}=\beta_{j}\left(i\right)$
+\end_inset
+
+
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial A}{\partial\eta_{k}} & =\frac{\sum_{s}e^{\alpha_{s}}\frac{\partial\alpha_{s}}{\partial\beta_{j}\left(i\right)}}{\sum_{j}e^{\alpha_{j}}}=\frac{\sum_{s}e^{\alpha_{s}}\left(1_{s=i}\frac{1}{2}\cdot2\cdot\Sigma_{j\rightarrow}\beta\left(i\right)\right)}{\sum_{j}e^{\alpha_{j}}}=\frac{e^{\alpha_{i}}\left(\Sigma\beta\left(i\right)\right)_{j}}{\sum_{j}e^{\alpha_{j}}}\\
+ & =\frac{e^{\alpha_{i}}\left(\mu_{i}\right)_{j}}{\sum_{j}e^{\alpha_{j}}}=\left(\pi_{i}\mu_{i}\right)_{j}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, when we want to moment-match some vector of (projected) ESS 
+\begin_inset Formula $\tau$
+\end_inset
+
+, we solve:
+\begin_inset Formula 
+\begin{align*}
+\tau=\hat{E_{D}}\left(T\right)=E_{D}\nabla_{\eta}A & =\left(\begin{array}{c}
+\pi\\
+\pi_{1}\mu_{1}\\
+.\\
+.\\
+\pi_{r}\mu_{r}
+\end{array}\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

@@ -1,10 +1,13 @@
 module Gibbs
 
-import PGM0: DiscreteMRF
+import PGM0.MRF: DiscreteMRF
+import PGM0.Vars: Clamps
 import Iterators: skip, everynth
 
-function transition!(model::DiscreteMRF, x::Vector)
-    i = rand(1:n_vars(model))
+uniform_from{T}(a::Vector{T}) = a[rand(1:length(a))]
+
+function transition!(model::DiscreteMRF, x::Vector, clamps::Clamps)
+    i = uniform_from(clamps.unclamped)
     x[i] = sample1(model,x,i)
 end
 
@@ -34,24 +37,28 @@ function sample1(model::DiscreteMRF, x::Vector, i::Int)
     return StatsBase.sample(StatsBase.WeightVec(post, 1.0))
 end
 
-unif_random_assignment(model::DiscreteMRF) = [rand(1:n_states(model,i)) for i in 1:n_vars(model)]
+function unif_random_assignment(model::DiscreteMRF, clamps::Clamps)
+    x = zeros(Int, n_vars(model))
+    for i in clamps.unclamped; x[i] = rand(1:n_states(model,i)); end
+    for c in clamps.clamped; x[c.var_id] = c.val end
+end
 
-function produce_chain!(model::DiscreteMRF, x::Vector=nothing)
-    if x === nothing; x = unif_random_assignment(model); end
-    nv = n_vars(model)
+function produce_chain!(model::DiscreteMRF, clamps::Clamps, start::Vector=nothing)
+    x = start
+    if x === nothing; x = unif_random_assignment(model, clamps); end
     while true
-        for i in 1:nv
-            transition!(model,x)
+        for i in clamps.unclamped
+            x[i] = sample1(model, x, i)
             produce(x)
         end
     end
 end
 
-function sample(model::DiscreteMRF, burn_in::Int, interval::Int;
+function sample(model::DiscreteMRF, clamps::Clamps, burn_in::Int, interval::Int;
                 start::Vector=nothing)
-    chain = Task(produce_chain!(model, start))
-    nv = n_vars(model)
-    everynth(drop(chain, burn_in*nv), interval*nv)
+    chain = Task(produce_chain!(model, clamps, start))
+    n_unclamped = length(clamps.unclamped)
+    everynth(drop(chain, burn_in*n_unclamped), interval*n_unclamped)
 end
 
 end

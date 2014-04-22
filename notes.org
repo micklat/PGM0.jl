@@ -1,0 +1,5 @@
+* how to get a case of really bad clustering
+In commit 158ff44, TaylorEM.compare_methjods(100,11) shows a case where EM fails to find a
+global maximum in a very easy problem. I wrote a possible strategy for fixing this in my
+google docs learning journal. Connecting the cov(T) matrix with the equilibrium problem,
+leads to fast methods of choosing intelligent perturbations (using low-rank PCA on T).
