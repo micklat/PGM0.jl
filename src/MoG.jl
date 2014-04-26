@@ -158,29 +158,25 @@ function project_mog_ess(et, eta, eta_during_inference, covt, n_modes, n_dims, m
     Δinds = Δτ[1:n_modes]
     decreasing_modes = Δinds .< 0
     if any(decreasing_modes)
-        ## # we want: 0 <= new_inds[i] = inds[i] + α * Δinds[i]
-        ## # -inds[i] <= α * Δinds[i], and since Δinds[i]<0, this implies
-        ## # -inds[i] / Δinds[u] >= α, hence we take a minimum over the LHS:
-        # α = minimum(-et.inds[decreasing_modes] ./ Δinds[decreasing_modes])
-        # prevent any mode from losing more than 50% of its mass
-        # 0.5 <= (inds[i] + α*Δinds[i]) / inds[i]
-        # 0.5*inds[i] <= inds[i] + α*Δinds[i]
-        # -inds[i] <= 2*α*Δinds[i]
-        # -0.5*inds[i]/Δinds[i] >= α
+        # prevent any mode from falling below `c` of its mass
+        # c <= (inds[i] + α*Δinds[i]) / inds[i]
+        # c*inds[i] <= inds[i] + α*Δinds[i]
+        # -(1-c)*inds[i] <= α*Δinds[i]
+        # -(1-c)*inds[i]/Δinds[i] >= α
         # hence we take the minimum of the LHS
-        α = min(1.0, minimum(-0.5 .* et.inds[decreasing_modes] / Δinds[decreasing_modes]))
+        c = 0.5
+        α = min(1.0, minimum(-(1-c) .* et.inds[decreasing_modes] / Δinds[decreasing_modes]))
     else
         α = 1.0
     end
-    #α *= 0.8^(m_iter-1)
-    #print(α, ' ')
     projected_et = MogESS(et.inds + α*Δinds, et.x_inds + α*Δx_inds)
 end
 #end # @debug
 
-MAX_M_ITER = 2
+MAX_M_ITER = 3
 
-function mog_accelerated_em(x::Array{F64,2}, n_modes, Σ = nothing)
+function mog_accelerated_em(x::Array{F64,2}, n_modes, Σ = nothing;
+                            produce_from_inner_loop=false)
     n_dims, n_samples = size(x)
     if Σ === nothing; Σ = ScalMat(n_dims, 1.0); end
     TGaussian = GenericMvNormal{typeof(Σ)}
@@ -206,7 +202,8 @@ function mog_accelerated_em(x::Array{F64,2}, n_modes, Σ = nothing)
             #println(m_iter, ": ", mixture.probs, ", ", [c.μ for c in mixture.components])
             eta = eta_from(mixture, Σ)
             
-            if m_iter==MAX_M_ITER; break; end           
+            if m_iter==MAX_M_ITER; break; end
+            if produce_from_inner_loop; produce(mixture); end
             m_iter+=1
             projected_et = project_mog_ess(et, eta, eta_during_inference, covt,
                               n_modes, n_dims, m_iter)
@@ -278,7 +275,9 @@ end
 # this settings shows that the 2nd order algorithm is faster, with commit 6a7bd6
 #function compare_methods(n=3000, seed=0, repetitions=20, chart=false)
 
-function compare_methods(n=3000, repetitions=20; seed=0, chart=false)
+# I get an average 43% speedup with n=2000, c=0.5, seed=0, and MAX_M_ITER=3.
+
+function compare_methods(n=2000, repetitions=20; seed=0, chart=false)
     if chart
         PyPlot.figure(1)
         PyPlot.clf()

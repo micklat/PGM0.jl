@@ -1,7 +1,9 @@
 module PGM0
 
 include("utils.jl")
-include("MRF.jl")
+include("vars.jl")
+include("factors.jl")
+include("structures.jl")
 include("gibbs.jl")
 include("MoG.jl")
 

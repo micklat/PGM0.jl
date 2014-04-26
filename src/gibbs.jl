@@ -1,6 +1,6 @@
 module Gibbs
 
-import PGM0.MRF: DiscreteMRF
+import PGM0.Structures: DiscreteMRF
 import PGM0.Vars: Clamps
 import Iterators: skip, everynth
 

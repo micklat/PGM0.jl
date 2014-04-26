@@ -10,6 +10,10 @@ immutable Chunk
                               # to examples.
 end
 
+type Model
+    bn :: 
+end
+
 type MRF_ESS
     # Counts are the sufficient statistics of a DiscreteMRF. For every factor F, and for
     # every assignment x to F's domain, we need a value that is the expectation of the
@@ -21,9 +25,10 @@ type MRF_ESS
     total_weight :: Float64
 end
 
-function suffstats(estimate, chunks)
+function suffstats(model, chunks)
+    ss = MRF_ESS(model., 
     for chunk in chunks
-        for x in columns(chunk)
+        for i in 1:size(chunk,2)
             
         end
     end
