@@ -1,11 +1,12 @@
 module Factors
-using PGM0.Vars
 export Indexed
 
-type Indexed{T}
+abstract Factor
+
+type Indexed{T} <: Factor
     vars_env :: Vars.Env
     domain :: Vector{Int}
-    logp :: Array{T} # conditional log-probability or log-density
+    logp :: Array{T} # log-potential. Might be a scalar or a Distribution (hopefully)
 
     function Indexed(env::Vars.Env,
                      dom::AbstractVector{Int}, lp::Array{T};
@@ -28,6 +29,9 @@ type Indexed{T}
         new(env, dom, lp)
     end
 end
+
+domain(f::Indexed) = f.domain
+log_eval{T<:Real,S}(f::Indexed{T}, context::Vector{S}) = f.logp[context[f.domain]...]
 
 function +(f1::Indexed, f2::Indexed)
     assert(f1.vars_env === f2.vars_env)

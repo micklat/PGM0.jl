@@ -2,14 +2,14 @@ module Vars
 
 export Named, Discrete, AnyVar, Env
 
-abstract AnyVar
+abstract Variable
 
-type Discrete <: AnyVar
+type Discrete <: Variable
     n_states :: Int
 end
 
-type Named
-    var::AnyVar
+type Named{T<:Variable}
+    var::T
     name::String
     id::Int
 end

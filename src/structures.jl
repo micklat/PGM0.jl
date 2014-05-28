@@ -1,4 +1,3 @@
-
 module Structures
 import PGM0: Vars
 import PGM0: Factors
@@ -22,28 +21,38 @@ end
 factor_domains(mrf::MRFStructure) = mrf.domains
 env(mrf::MRFStructure) = mrf.env
 
-type DiscretePGM{Structure<:PGMStructure}
+type PGM{Structure<:PGMStructure, F<:Factors.Factor}
     structure :: Structure
-    # factors[i] is the vector of factors that contain variable i
+    # var_to_factors[i] is the vector of factors that contain variable i
     # Note that for a factor over k variables, there are k values
     # of i s.t. the factor is in factors[i]. 
-    factors :: Vector{Vector{Factors.Indexed}}
+    var_to_factors :: Vector{Vector{F}}
     # all_factors contains every factor just once
-    all_factors :: Vector{Factors.Indexed} # collect(distinct(chain(factors...)))
+    all_factors :: Vector{F} # collect(distinct(chain(var_to_factors...)))
+
+    function PGM(s::Structure, factors::Vector{F})
+        var_to_factors = [[] for _ in 1:length(env(s))]
+        for factor in factors
+            for var in domain(factor)
+                push!(var_to_factors[var], factor)
+            end
+        end
+        new(s, var_to_factors, factors)
+    end
 end
 
-function discrete_mrf(vars::Vector{Vars.Named}, factors::Vector{Vector{Factors.Indexed}})
-    distinct_factors = collect(distinct(chain(factors...)))
-    domains = [factor.domain for factor in distinct_factors]
-    structure = MRFStructure(vars, domains)
-    mrf = DiscretePGM{MRFStructure}(structure, factors, distinct_factors)
-    return mrf
+typealias DiscretePGM{T<:PGMStructure} PGM{T, Factors.Indexed}
+typealias DiscreteBN PGM{BNStructure, Factors.Indexed}
+typealias DiscreteMRF PGM{MRFStructure, Factors.Indexed}
+typealias HybridBN PGM{BNStructure, Factors.Factor}
+
+function discrete_mrf(vars::Vector{Vars.Named}, factors::Vector{Factors.Indexed})
+    structure = MRFStructure(vars, map(domain, factors))
+    DiscreteMRF(structure, factors)
 end
 
-n_vars(m::DiscretePGM) = length(env(m.structure))
-n_states(m::DiscretePGM, i::Int) = let e = env(m.structure); e[i].var.n_states end
-
-typealias DiscreteBayesianNetwork DiscretePGM{BNStructure}
-typealias DiscreteMRF DiscretePGM{MRFStructure}
+env(pgm::PGM) = env(pgm.structure)
+n_vars(m::PGM) = length(env(m))
+n_states(m::PGM, i::Integer) = env(m)[i].var.n_states # only works for discrete variables
 
 end # Structures
